@@ -13,47 +13,47 @@ def load_demo(demo_key: str) -> dict:
     return json.loads(path.read_text())
 
 
-def step_generate_case(dispute: str) -> dict:
-    return generate_json('case_gen', dispute=dispute)
+def run_custom_trial(dispute: str) -> dict:
 
-
-def step_generate_evidence(case_data: dict) -> dict:
-    return generate_json('evidence_extract', trial_summary=json.dumps(case_data))
-
-
-def step_generate_witnesses(case_data: dict) -> list:
-    result = generate_json(
-        'witness_gen',
-        case_title=case_data.get('title', ''),
-        setting=case_data.get('setting', ''),
-        num_witnesses=3,
-    )
-    if isinstance(result, dict):
-        return result.get('witnesses', [result])
-    return result
-
-
-def step_generate_args(case_data: dict, evidence_list: list) -> dict:
-    evidence_summary = '; '.join(e.get('description', '') for e in evidence_list)
-    return generate_json(
-        'lawyer_args',
-        case_title=case_data.get('title', ''),
-        evidence_summary=evidence_summary,
+    trial = generate_json(
+        "trial_gen",
+        dispute=dispute
     )
 
+    case_data = trial["case"]
+    evidence_list = trial["evidence"]
+    witnesses = trial["witnesses"]
+    lawyers = trial["lawyers"]
 
-def step_cross_examine(witness: dict, case_data: dict) -> list:
-    result = generate_json(
-        'cross_exam',
-        witness_name=witness.get('name', ''),
-        personality=witness.get('personality', ''),
-        case_title=case_data.get('title', ''),
-        alibi_claim=witness.get('alibi_claim', ''),
-        secret=witness.get('secret', ''),
+    case_id = save_case(dispute, case_data)
+
+    save_evidence(case_id, evidence_list)
+    save_witnesses(case_id, witnesses)
+
+    prolog_result = step_run_prolog(
+        evidence_list,
+        witnesses,
+        case_data["defendant"]
     )
-    if isinstance(result, list):
-        return result
-    return []
+
+    firebase_id = step_archive(
+        case_id,
+        case_data["title"],
+        prolog_result,
+        []
+    )
+
+    return {
+        "case_id": case_id,
+        "case": case_data,
+        "evidence": evidence_list,
+        "witnesses": witnesses,
+        "lawyers": lawyers,
+        "verdict": prolog_result["verdict"],
+        "contradictions": prolog_result["contradictions"],
+        "firebase_id": firebase_id,
+        "is_demo": False
+    }
 
 
 def step_run_prolog(evidence_list: list, witnesses: list, defendant_name: str) -> dict:

@@ -1,0 +1,44 @@
+Generate a complete courtroom case.
+
+Dispute:
+"{dispute}"
+
+Return ONLY valid JSON.
+
+{
+  "case": {
+    "title": "",
+    "setting": "",
+    "plaintiff": "",
+    "defendant": ""
+  },
+
+  "evidence": [
+    {
+      "description": "",
+      "prolog_fact": "",
+      "evidence_type": ""
+    }
+  ],
+
+  "witnesses": [
+    {
+      "name": "",
+      "occupation": "",
+      "personality": "",
+      "alibi_claim": "",
+      "secret": "",
+      "prolog_facts": []
+    }
+  ],
+
+  "lawyers": {
+    "prosecution": "",
+    "defence": ""
+  }
+}
+
+Generate exactly:
+- 3 evidence items
+- 3 witnesses
+- short lawyer arguments

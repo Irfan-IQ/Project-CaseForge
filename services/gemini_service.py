@@ -66,18 +66,40 @@ def generate(prompt_name: str, **kwargs) -> str:
 
 def generate_json(prompt_name: str, **kwargs) -> dict:
     prompt = load_prompt(prompt_name, **kwargs)
+
     prompt += (
         "\nRespond ONLY with valid JSON. "
-        "No markdown backticks, no code blocks, just raw JSON."
+        "No markdown. No explanations."
     )
 
+    raw = None
+
+    # -----------------------------
+    # Gemini First
+    # -----------------------------
     try:
         response = gemini_model.generate_content(prompt)
         raw = response.text.strip()
 
     except Exception as e:
-        print(f"[WARNING] Gemini failed, switching to OpenRouter: {e}")
-        raw = call_openrouter(prompt).strip()
+        print(f"[Gemini Failed] {e}")
+
+    # -----------------------------
+    # OpenRouter Fallback
+    # -----------------------------
+    if raw is None:
+
+        try:
+            print("[Fallback] Using OpenRouter")
+
+            raw = call_openrouter(prompt).strip()
+
+        except Exception as fallback_error:
+            raise RuntimeError(
+                f"Gemini and OpenRouter both failed.\n"
+                f"Gemini: {e}\n"
+                f"OpenRouter: {fallback_error}"
+            )
 
     raw = raw.strip("`")
 
@@ -88,15 +110,19 @@ def generate_json(prompt_name: str, **kwargs) -> dict:
         return json.loads(raw)
 
     except json.JSONDecodeError:
+
         start = raw.find("{")
         if start == -1:
             start = raw.find("[")
 
-        end = raw.rfind("}")
-        if end == -1:
-            end = raw.rfind("]")
+        end = max(
+            raw.rfind("}"),
+            raw.rfind("]")
+        )
 
         if start != -1 and end != -1:
-            return json.loads(raw[start:end + 1])
+            return json.loads(
+                raw[start:end + 1]
+            )
 
         raise
