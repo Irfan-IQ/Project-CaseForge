@@ -287,18 +287,37 @@ class TrialScreen(Screen):
             runner.step_archive, case_id, demo['title'], prolog_result, []
         )
 
-        verdict = prolog_result['verdict'].upper().replace('_', ' ')
-        self._log(f'\n[bold red]━━━ VERDICT: {verdict} ━━━[/bold red]')
-        self._status(f'[green]Complete. Verdict: {verdict}[/green]')
-        await asyncio.sleep(1.5)
-        self.app.push_screen(VerdictScreen(result={
-            'title': demo['title'],
-            'verdict': prolog_result['verdict'],
-            'contradictions': prolog_result['contradictions'],
-            'firebase_id': firebase_id,
-            'evidence_list': evidence_list,
-            'witnesses': witnesses,
-        }))
+		    self._log('\n[bold yellow]━━━ LEGAL REASONING ENGINE ━━━[/bold yellow]')
+
+				await asyncio.sleep(1)
+
+				self._log('[yellow]Analyzing witness testimony...[/yellow]')
+				await asyncio.sleep(1.5)
+
+				self._log('[yellow]Checking evidence consistency...[/yellow]')
+				await asyncio.sleep(1.5)
+
+				self._log('[yellow]Cross-referencing statements...[/yellow]')
+				await asyncio.sleep(1.5)
+
+				self._log('[yellow]Consulting Prolog legal engine...[/yellow]')
+				await asyncio.sleep(2)
+
+				self._log('[yellow]Evaluating motive, opportunity and alibi...[/yellow]')
+				await asyncio.sleep(2)
+
+				self._log('[yellow]Finalizing court decision...[/yellow]')
+				await asyncio.sleep(2)
+
+				verdict = result["verdict"].upper().replace("_", " ")
+
+				self._log(f'\n[bold red]━━━ VERDICT READY ━━━[/bold red]')
+
+				self._log('[bold green]Press ENTER to reveal final verdict[/bold green]')
+
+				self._status('[green]Verdict ready. Press ENTER.[/green]')
+
+				self.final_result = result
 
 
 class VerdictScreen(Screen):
