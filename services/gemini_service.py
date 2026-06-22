@@ -16,7 +16,7 @@ openrouter_client = OpenAI(
     base_url="https://openrouter.ai/api/v1",
 )
 
-OPENROUTER_MODEL = "meta-llama/llama-3.1-8b-instruct:free"
+OPENROUTER_MODEL = "deepseek/deepseek-r1:free"
 
 
 def load_prompt(name: str, **kwargs) -> str:
