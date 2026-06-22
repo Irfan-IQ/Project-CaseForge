@@ -24,7 +24,7 @@ openrouter_client = OpenAI(
 )
 
 # Change this if you want another model
-OPENROUTER_MODEL = "google/gemma-3-12b-it:free"
+OPENROUTER_MODEL = "meta-llama/llama-3.1-8b-instruct:free"
 
 
 def load_prompt(name: str, **kwargs) -> str:
@@ -75,7 +75,7 @@ def generate_json(prompt_name: str, **kwargs) -> dict:
         raw = response.text.strip()
 
     except Exception as e:
-        print(f"[WARNING] Gemini failed, switching to OpenRouter: {e}")
+        print(f"[WARNING] Gemini failed ({type(e).__name__}: {e}), switching to OpenRouter")
         raw = call_openrouter(prompt).strip()
 
     raw = raw.strip("`")
