@@ -29,7 +29,14 @@ OPENROUTER_MODEL = "google/gemma-4-26b-a4b-it:free"
 
 def load_prompt(name: str, **kwargs) -> str:
     template = Path(f"prompts/{name}.txt").read_text()
-    return template.format(**kwargs)
+
+    for key, value in kwargs.items():
+        template = template.replace(
+            f"{{{key}}}",
+            str(value)
+        )
+
+    return template
 
 
 def call_openrouter(prompt: str) -> str:
