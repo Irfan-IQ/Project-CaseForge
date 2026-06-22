@@ -1,7 +1,12 @@
-from pyswip import Prolog
-
-
 def run_verdict(case_facts: list[str], defendant: str = 'defendant') -> dict:
+    try:
+        from pyswip import Prolog
+    except Exception as e:
+        raise RuntimeError(
+            f"SWI-Prolog is not installed. Install it with: "
+            f"sudo apt install swi-prolog\n(Original error: {e})"
+        )
+
     prolog = Prolog()
     prolog.consult('prolog/rules.pl')
 
