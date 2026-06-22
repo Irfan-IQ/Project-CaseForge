@@ -5,6 +5,7 @@ import time
 from pathlib import Path
 from dotenv import load_dotenv
 from openai import OpenAI
+import re
 
 load_dotenv()
 
@@ -101,10 +102,11 @@ def generate_json(prompt_name: str, **kwargs) -> dict:
                 f"OpenRouter: {fallback_error}"
             )
 
-    raw = raw.strip("`")
-
-    if raw.startswith("json"):
+    raw = re.sub(r"^```(?:json)?\s*", "", raw.strip(), flags=re.IGNORECASE)
+    raw = re.sub(r"\s*```$", "", raw.strip())
+    if raw.lower().startswith("json"):  # bare "json" prefix fallback
         raw = raw[4:].strip()
+    raw = raw.strip()
 
     try:
         return json.loads(raw)
