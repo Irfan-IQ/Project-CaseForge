@@ -2,9 +2,11 @@
 
 AI-powered courtroom simulation engine. Submit any dispute — stolen biryani, broken collectible, proxy attendance — and watch a full legal drama unfold: witnesses, evidence, lawyer arguments, and a deterministic Prolog verdict.
 
+> **Powered by Google Gemini API** — the creative intelligence behind every case, witness, and argument generated in VerdictOS. Gemini transforms a one-line dispute into a full courtroom drama.
+
 **Live:** https://verdictos.onrender.com
 
-**Stack:** Python 3.11 · Textual TUI · Flask SSE · OpenRouter (Gemini / Llama fallback) · SWI-Prolog · SQLite · Firebase Firestore · Render
+**Stack:** Python 3.11 · Textual TUI · Flask SSE · **Google Gemini API** · SWI-Prolog · SQLite · Firebase Firestore · Render
 
 ---
 
