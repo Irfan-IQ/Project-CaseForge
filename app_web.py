@@ -282,63 +282,40 @@ def stream_trial(dispute: str, demo_key: str | None):
                 })
                 return
 
-            yield sse('status', {'text': 'Step 1/6 · Generating case...'})
+            yield sse('status', {'text': 'Generating trial (this may take ~30s)...'})
             yield sse('log', {'text': '━━━ CASE GENERATION ━━━', 'cls': 'system'})
-            case_data = runner.step_generate_case(dispute)
-            case_id = save_case(dispute, case_data)
+
+            result = runner.run_custom_trial(dispute)
+
+            case_data = result['case']
+            evidence_list = result['evidence']
+            witnesses = result['witnesses']
+            lawyers = result['lawyers']
+
             yield sse('log', {'text': f"CASE: {case_data.get('title', '')}"})
             yield sse('log', {'text': f"Setting: {case_data.get('setting', '')}"})
             yield sse('log', {'text': f"Defendant: {case_data.get('defendant', '')}", 'cls': 'prosecution'})
             yield sse('log', {'text': f"Plaintiff: {case_data.get('plaintiff', '')}"})
 
-            yield sse('status', {'text': 'Step 2/6 · Extracting evidence...'})
-            yield sse('log', {'text': '\n━━━ EVIDENCE EXTRACTION ━━━', 'cls': 'system'})
-            evidence_data = runner.step_generate_evidence(case_data)
-            evidence_list = evidence_data.get('evidence_list', [])
-            save_evidence(case_id, evidence_list)
+            yield sse('log', {'text': '\n━━━ EVIDENCE BOARD ━━━', 'cls': 'system'})
             for e in evidence_list:
                 yield sse('log', {'text': f"  ■ [{e.get('evidence_type','?')}] {e.get('description','')}"})
                 yield sse('evidence', {'type': e.get('evidence_type', '?'), 'desc': e.get('description', '')})
 
-            yield sse('status', {'text': 'Step 3/6 · Generating witnesses...'})
-            yield sse('log', {'text': '\n━━━ WITNESS GENERATION ━━━', 'cls': 'system'})
-            witnesses = runner.step_generate_witnesses(case_data)
-            save_witnesses(case_id, witnesses)
+            yield sse('log', {'text': '\n━━━ WITNESSES ━━━', 'cls': 'system'})
             for w in witnesses:
                 yield sse('log', {'text': f"  ■ {w.get('name','')} — {w.get('occupation','')}", 'cls': 'witness'})
                 yield sse('log', {'text': f"    Alibi: {w.get('alibi_claim','')}", 'cls': 'dim'})
                 yield sse('witness', {'name': w.get('name', ''), 'alibi': w.get('alibi_claim', '')})
 
-            yield sse('status', {'text': 'Step 4/6 · Lawyer arguments...'})
             yield sse('log', {'text': '\n━━━ OPENING ARGUMENTS ━━━', 'cls': 'system'})
-            args = runner.step_generate_args(case_data, evidence_list)
-            yield sse('log', {'text': f"PROSECUTION: {args.get('prosecution','')}", 'cls': 'prosecution'})
-            yield sse('log', {'text': f"DEFENCE: {args.get('defence','')}", 'cls': 'defence'})
+            yield sse('log', {'text': f"PROSECUTION: {lawyers.get('prosecution','')}", 'cls': 'prosecution'})
+            yield sse('log', {'text': f"DEFENCE: {lawyers.get('defence','')}", 'cls': 'defence'})
 
-            yield sse('status', {'text': 'Step 5/6 · Cross-examination...'})
-            yield sse('log', {'text': '\n━━━ CROSS-EXAMINATION ━━━', 'cls': 'system'})
-            cross_exams = []
-            for witness in witnesses:
-                yield sse('log', {'text': f"\nWitness: {witness.get('name','')}", 'cls': 'witness'})
-                cx = runner.step_cross_examine(witness, case_data)
-                cross_exams.append(cx)
-                for qa in cx:
-                    q = qa.get('questioner', 'Q')
-                    cls = 'prosecution' if q == 'PROSECUTION' else 'defence'
-                    yield sse('log', {'text': f"  {q}: {qa.get('question','')}", 'cls': cls})
-                    prefix = '  ⚠ CONTRADICTION  ' if qa.get('contradiction') else '  '
-                    c = 'contradiction' if qa.get('contradiction') else 'qa'
-                    yield sse('log', {'text': f"{prefix}{qa.get('answer','')}", 'cls': c})
-
-            yield sse('status', {'text': 'Step 6/6 · Running Prolog verdict engine...'})
             yield sse('log', {'text': '\n━━━ PROLOG VERDICT ENGINE ━━━', 'cls': 'system'})
-            prolog_result = runner.step_run_prolog(evidence_list, witnesses, case_data.get('defendant', 'defendant'))
+            prolog_result = {'verdict': result['verdict'], 'contradictions': result['contradictions']}
             for c in prolog_result.get('contradictions', []):
                 yield sse('log', {'text': f"  CONTRADICTION DETECTED: {c}", 'cls': 'contradiction'})
-            if prolog_result.get('error'):
-                yield sse('log', {'text': f"  (Prolog note: {prolog_result['error']})", 'cls': 'dim'})
-
-            firebase_id = runner.step_archive(case_id, case_data.get('title', ''), prolog_result, cross_exams)
 
             verdict = prolog_result['verdict'].upper().replace('_', ' ')
             yield sse('log', {'text': f"\n━━━ VERDICT: {verdict} ━━━", 'cls': 'verdict'})
@@ -346,7 +323,7 @@ def stream_trial(dispute: str, demo_key: str | None):
                 'title': case_data.get('title', ''),
                 'verdict': prolog_result['verdict'],
                 'contradictions': prolog_result.get('contradictions', []),
-                'firebase_id': firebase_id or '',
+                'firebase_id': result.get('firebase_id') or '',
             })
 
         except Exception as exc:
