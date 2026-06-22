@@ -1,4 +1,4 @@
-Generate a complete courtroom case.
+Generate a complete courtroom case(comical,funny).
 
 Dispute:
 "{dispute}"

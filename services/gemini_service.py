@@ -74,6 +74,7 @@ def generate(prompt_name: str, **kwargs) -> str:
 
 def generate_json(prompt_name: str, **kwargs) -> dict:
     prompt = load_prompt(prompt_name, **kwargs)
+    gemini_error = None
 
     prompt += (
         "\nRespond ONLY with valid JSON. "
@@ -86,11 +87,12 @@ def generate_json(prompt_name: str, **kwargs) -> dict:
     # Gemini First
     # -----------------------------
     try:
-        response = gemini_model.generate_content(prompt)
-        raw = response.text.strip()
+    	response = gemini_model.generate_content(prompt)
+ 			raw = response.text.strip()
 
     except Exception as e:
-        print(f"[Gemini Failed] {e}")
+    	gemini_error = e
+    	print(f"[Gemini Failed] {e}")
 
     # -----------------------------
     # OpenRouter Fallback
@@ -103,9 +105,10 @@ def generate_json(prompt_name: str, **kwargs) -> dict:
             raw = call_openrouter(prompt).strip()
 
         except Exception as fallback_error:
+        		print("Gemini Error =", gemini_error)
             raise RuntimeError(
                 f"Gemini and OpenRouter both failed.\n"
-                f"Gemini: {e}\n"
+                f"Gemini: {gemini_error}\n"
                 f"OpenRouter: {fallback_error}"
             )
 
