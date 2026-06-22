@@ -24,7 +24,7 @@ openrouter_client = OpenAI(
 )
 
 # Change this if you want another model
-OPENROUTER_MODEL = "google/gemma-4-26b-a4b-it:free"
+OPENROUTER_MODEL = "meta-llama/llama-3.1-8b-instruct:free"
 
 
 def load_prompt(name: str, **kwargs) -> str:
