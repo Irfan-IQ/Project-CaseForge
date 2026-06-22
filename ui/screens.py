@@ -141,6 +141,19 @@ class TrialScreen(Screen):
     def _status(self, msg: str) -> None:
         self.query_one('#status_bar', Label).update(msg)
 
+    def on_key(self, event) -> None:
+
+        if (
+            event.key == "enter"
+            and hasattr(self, "final_result")
+        ):
+
+            self.app.push_screen(
+                VerdictScreen(
+                    result=self.final_result
+                )
+            )
+
     async def _run_trial(self) -> None:
         import services.trial_runner as runner
         from database.db import save_case, save_witnesses, save_evidence
@@ -150,81 +163,83 @@ class TrialScreen(Screen):
                 await self._run_demo(runner)
                 return
 
-            self._status('[yellow]Step 1/6 · Generating case...[/yellow]')
-            self._log('[bold cyan]━━━ CASE GENERATION ━━━[/bold cyan]')
-            case_data = await asyncio.to_thread(runner.step_generate_case, self.dispute)
-            case_id = await asyncio.to_thread(save_case, self.dispute, case_data)
-            self._log(f'[bold white]CASE:[/bold white] {case_data.get("title", "")}')
-            self._log(f'[yellow]Setting:[/yellow] {case_data.get("setting", "")}')
-            self._log(f'[red]Defendant:[/red] {case_data.get("defendant", "")}')
-            self._log(f'[green]Plaintiff:[/green] {case_data.get("plaintiff", "")}')
+            self._status('[yellow]Generating trial...[/yellow]')
 
-            self._status('[yellow]Step 2/6 · Extracting evidence...[/yellow]')
-            self._log('\n[bold cyan]━━━ EVIDENCE EXTRACTION ━━━[/bold cyan]')
-            evidence_data = await asyncio.to_thread(runner.step_generate_evidence, case_data)
-            evidence_list = evidence_data.get('evidence_list', [])
-            await asyncio.to_thread(save_evidence, case_id, evidence_list)
+            result = await asyncio.to_thread(
+                runner.run_custom_trial,
+                self.dispute
+            )
+
+            case_data = result["case"]
+            evidence_list = result["evidence"]
+            witnesses = result["witnesses"]
+            lawyers = result["lawyers"]
+
+            self._log(f'[bold white]CASE:[/bold white] {case_data["title"]}')
+            self._log(f'[yellow]Setting:[/yellow] {case_data["setting"]}')
+            self._log(f'[red]Defendant:[/red] {case_data["defendant"]}')
+            self._log(f'[green]Plaintiff:[/green] {case_data["plaintiff"]}')
+
             ev_table = self.query_one('#evidence_table', EvidenceBoard)
+
             for e in evidence_list:
-                self._log(f'  [yellow]■[/yellow] [{e.get("evidence_type", "?")}] {e.get("description", "")}')
-                ev_table.add_row(e.get('evidence_type', '?'), e.get('description', ''))
+                ev_table.add_row(
+                    e.get("evidence_type", ""),
+                    e.get("description", "")
+                )
 
-            self._status('[yellow]Step 3/6 · Generating witnesses...[/yellow]')
-            self._log('\n[bold cyan]━━━ WITNESS GENERATION ━━━[/bold cyan]')
-            witnesses = await asyncio.to_thread(runner.step_generate_witnesses, case_data)
-            await asyncio.to_thread(save_witnesses, case_id, witnesses)
             wit_table = self.query_one('#witness_table', DataTable)
+
             for w in witnesses:
-                self._log(f'  [magenta]■[/magenta] {w.get("name", "")} — {w.get("occupation", "")}')
-                self._log(f'    Alibi: [italic]{w.get("alibi_claim", "")}[/italic]')
-                wit_table.add_row(w.get('name', ''), w.get('alibi_claim', ''))
+                wit_table.add_row(
+                    w.get("name", ""),
+                    w.get("alibi_claim", "")
+                )
 
-            self._status('[yellow]Step 4/6 · Lawyer arguments...[/yellow]')
-            self._log('\n[bold cyan]━━━ OPENING ARGUMENTS ━━━[/bold cyan]')
-            args = await asyncio.to_thread(runner.step_generate_args, case_data, evidence_list)
-            self._log(f'[bold red]PROSECUTION:[/bold red] {args.get("prosecution", "")}')
-            self._log(f'\n[bold blue]DEFENCE:[/bold blue] {args.get("defence", "")}')
-
-            self._status('[yellow]Step 5/6 · Cross-examination...[/yellow]')
-            self._log('\n[bold cyan]━━━ CROSS-EXAMINATION ━━━[/bold cyan]')
-            cross_exams = []
-            for witness in witnesses:
-                self._log(f'\n[bold white]Witness: {witness.get("name", "")}[/bold white]')
-                cx = await asyncio.to_thread(runner.step_cross_examine, witness, case_data)
-                cross_exams.append(cx)
-                for qa in cx:
-                    q_color = 'red' if qa.get('questioner') == 'PROSECUTION' else 'blue'
-                    self._log(f'  [bold {q_color}]{qa.get("questioner", "Q")}:[/bold {q_color}] {qa.get("question", "")}')
-                    marker = '[bold red]⚠ CONTRADICTION  [/bold red]' if qa.get('contradiction') else ''
-                    self._log(f'  {marker}[italic]{qa.get("answer", "")}[/italic]')
-
-            self._status('[yellow]Step 6/6 · Running Prolog verdict engine...[/yellow]')
-            self._log('\n[bold yellow]━━━ PROLOG VERDICT ENGINE ━━━[/bold yellow]')
-            prolog_result = await asyncio.to_thread(
-                runner.step_run_prolog, evidence_list, witnesses, case_data.get('defendant', 'defendant')
-            )
-            for c in prolog_result.get('contradictions', []):
-                self._log(f'  [bold red]CONTRADICTION:[/bold red] {c}')
-            if prolog_result.get('error'):
-                self._log(f'  [dim]Prolog note: {prolog_result["error"]}[/dim]')
-
-            firebase_id = await asyncio.to_thread(
-                runner.step_archive, case_id, case_data.get('title', ''), prolog_result, cross_exams
+            self._log(
+                f'[bold red]PROSECUTION:[/bold red] '
+                f'{lawyers["prosecution"]}'
             )
 
-            verdict = prolog_result['verdict'].upper().replace('_', ' ')
-            self._log(f'\n[bold red]━━━ VERDICT: {verdict} ━━━[/bold red]')
-            self._status(f'[green]Complete. Verdict: {verdict}[/green]')
+            await asyncio.sleep(3)
+
+            self._log(
+                f'[bold blue]DEFENCE:[/bold blue] '
+                f'{lawyers["defence"]}'
+            )
+
+            await asyncio.sleep(3)
+
+            self._log('\n[bold yellow]━━━ LEGAL REASONING ENGINE ━━━[/bold yellow]')
+            await asyncio.sleep(1)
+        
+            self._log('[yellow]Analyzing witness testimony...[/yellow]')
             await asyncio.sleep(1.5)
-            self.app.push_screen(VerdictScreen(result={
-                'title': case_data.get('title', ''),
-                'verdict': prolog_result['verdict'],
-                'contradictions': prolog_result['contradictions'],
-                'firebase_id': firebase_id,
-                'evidence_list': evidence_list,
-                'witnesses': witnesses,
-            }))
+        
+            self._log('[yellow]Checking evidence consistency...[/yellow]')
+            await asyncio.sleep(1.5)
 
+            self._log('[yellow]Cross-referencing statements...[/yellow]')
+            await asyncio.sleep(1.5)
+            
+            self._log('[yellow]Consulting Prolog legal engine...[/yellow]')
+            await asyncio.sleep(2)
+            
+            self._log('[yellow]Evaluating motive, opportunity and alibi...[/yellow]')
+            await asyncio.sleep(2)
+        
+            for dots in [".", "..", "..."]:
+                self._log(f'[yellow]Finalizing court decision{dots}[/yellow]')
+                
+            await asyncio.sleep(1)
+        
+            verdict = result["verdict"].upper().replace("_", " ")
+        
+            self._log(f'\n[bold red]━━━ VERDICT READY ━━━[/bold red]')
+            self._log('[bold green]Press ENTER to reveal final verdict[/bold green]')
+            self._status('[green]Verdict ready. Press ENTER.[/green]')
+            self.final_result = result
+        
         except Exception as exc:
             self._log(f'[bold red]ERROR: {exc}[/bold red]')
             self._status(f'[red]Error: {exc}[/red]')
@@ -301,7 +316,7 @@ class TrialScreen(Screen):
         firebase_id = await asyncio.to_thread(
             runner.step_archive, case_id, demo['title'], prolog_result, []
         )
-
+        
         verdict = prolog_result['verdict'].upper().replace('_', ' ')
         self._log(f'\n[bold red]━━━ VERDICT: {verdict} ━━━[/bold red]')
         self._status(f'[green]Complete. Verdict: {verdict}[/green]')
