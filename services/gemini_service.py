@@ -1,4 +1,3 @@
-import google.generativeai as genai
 import os
 import json
 import time
@@ -12,8 +11,10 @@ load_dotenv()
 # -----------------------------
 # Gemini Setup
 # -----------------------------
-genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
-gemini_model = genai.GenerativeModel("gemini-1.5-flash")
+from google import genai as google_genai
+
+gemini_client = google_genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
+GEMINI_MODEL = "gemini-2.0-flash"
 
 # -----------------------------
 # OpenRouter Setup
@@ -23,8 +24,7 @@ openrouter_client = OpenAI(
     base_url="https://openrouter.ai/api/v1",
 )
 
-# Change this if you want another model
-OPENROUTER_MODEL = "meta-llama/llama-3.1-8b-instruct:free"
+OPENROUTER_MODEL = "deepseek/deepseek-r1:free"
 
 
 def load_prompt(name: str, **kwargs) -> str:
@@ -57,7 +57,7 @@ def generate(prompt_name: str, **kwargs) -> str:
     prompt = load_prompt(prompt_name, **kwargs)
 
     try:
-        response = gemini_model.generate_content(prompt)
+        response = gemini_client.models.generate_content(model=GEMINI_MODEL, contents=prompt)
         time.sleep(1)
         return response.text
 
@@ -87,7 +87,7 @@ def generate_json(prompt_name: str, **kwargs) -> dict:
     # Gemini First
     # -----------------------------
     try:
-        response = gemini_model.generate_content(prompt)
+        response = gemini_client.models.generate_content(model=GEMINI_MODEL, contents=prompt)
         raw = response.text.strip()
 
     except Exception as e:
