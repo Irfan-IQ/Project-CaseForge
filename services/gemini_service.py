@@ -1,18 +1,19 @@
-import google.generativeai as genai
 import os
 import json
 import time
 from pathlib import Path
 from dotenv import load_dotenv
 from openai import OpenAI
+from google import genai
+from google.genai import types
 
 load_dotenv()
 
 # -----------------------------
 # Gemini Setup
 # -----------------------------
-genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
-gemini_model = genai.GenerativeModel("gemini-1.5-flash")
+gemini_client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
+GEMINI_MODEL = "gemini-2.0-flash"
 
 # -----------------------------
 # OpenRouter Setup
@@ -49,18 +50,16 @@ def generate(prompt_name: str, **kwargs) -> str:
     prompt = load_prompt(prompt_name, **kwargs)
 
     try:
-        response = gemini_model.generate_content(prompt)
+        response = gemini_client.models.generate_content(model=GEMINI_MODEL, contents=prompt)
         time.sleep(1)
         return response.text
 
     except Exception as e:
-
         try:
             result = call_openrouter(prompt)
             time.sleep(1)
             return result
-
-        except Exception as fallback_error:
+        except Exception:
             raise
 
 
@@ -72,7 +71,7 @@ def generate_json(prompt_name: str, **kwargs) -> dict:
     )
 
     try:
-        response = gemini_model.generate_content(prompt)
+        response = gemini_client.models.generate_content(model=GEMINI_MODEL, contents=prompt)
         raw = response.text.strip()
 
     except Exception as e:
