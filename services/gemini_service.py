@@ -14,7 +14,7 @@ load_dotenv()
 from google import genai as google_genai
 
 gemini_client = google_genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
-GEMINI_MODEL = "gemini-1.5-flash-8b"
+GEMINI_MODEL = "gemini-1.5-flash"
 
 # -----------------------------
 # OpenRouter fallback
@@ -25,9 +25,9 @@ openrouter_client = OpenAI(
 )
 
 OPENROUTER_MODELS = [
-    "qwen/qwen-2.5-7b-instruct:free",
-    "meta-llama/llama-3.2-3b-instruct:free",
-    "microsoft/phi-3-mini-128k-instruct:free",
+    "google/gemma-4-26b-a4b-it:free",
+    "meta-llama/llama-3.3-70b-instruct:free",
+    "nousresearch/hermes-3-llama-3.1-405b:free",
 ]
 
 
