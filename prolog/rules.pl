@@ -6,6 +6,9 @@ has_opportunity(Defendant) :-
     saw_defendant_near_laundry(_, Defendant).
 
 has_opportunity(Defendant) :-
+    saw_defendant_near_scene(_, Defendant).
+
+has_opportunity(Defendant) :-
     noted_unusual_defendant_presence(
         Defendant,
         _

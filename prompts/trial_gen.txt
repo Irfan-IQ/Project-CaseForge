@@ -1,9 +1,19 @@
-Generate a complete courtroom case(comical,funny).
+Generate a complete courtroom case (comical, funny).
 
 Dispute:
 "{dispute}"
 
 Return ONLY valid JSON.
+
+IMPORTANT: For prolog_fact and prolog_facts, you MUST use ONLY these predicates (pick whichever fit the story):
+- saw_defendant_near_scene(WitnessAtom, DefendantAtom).
+- defendant_acted_shifty(DefendantAtom).
+- noted_unusual_defendant_presence(DefendantAtom, PlaceAtom).
+- valid_alibi(DefendantAtom).
+- location_at(WitnessAtom, TimeAtom, PlaceAtom).
+- forensic_match(ItemAtom, EvidenceAtom, PersonAtom).
+
+Rules: All atoms must be lowercase_with_underscores. Defendant atom must match the defendant's name lowercased with underscores. For a guilty verdict include defendant_acted_shifty and saw_defendant_near_scene WITHOUT valid_alibi. For not_guilty include valid_alibi. Each witness should have 1-2 prolog_facts.
 
 {
   "case": {
@@ -16,7 +26,7 @@ Return ONLY valid JSON.
   "evidence": [
     {
       "description": "",
-      "prolog_fact": "",
+      "prolog_fact": "defendant_acted_shifty(defendant_name_here).",
       "evidence_type": ""
     }
   ],
@@ -28,7 +38,7 @@ Return ONLY valid JSON.
       "personality": "",
       "alibi_claim": "",
       "secret": "",
-      "prolog_facts": []
+      "prolog_facts": ["saw_defendant_near_scene(witness_atom, defendant_atom)."]
     }
   ],
 
