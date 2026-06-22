@@ -87,12 +87,12 @@ def generate_json(prompt_name: str, **kwargs) -> dict:
     # Gemini First
     # -----------------------------
     try:
-    	response = gemini_model.generate_content(prompt)
- 			raw = response.text.strip()
+        response = gemini_model.generate_content(prompt)
+        raw = response.text.strip()
 
     except Exception as e:
-    	gemini_error = e
-    	print(f"[Gemini Failed] {e}")
+        gemini_error = e
+        print(f"[Gemini Failed] {e}")
 
     # -----------------------------
     # OpenRouter Fallback
@@ -105,12 +105,12 @@ def generate_json(prompt_name: str, **kwargs) -> dict:
             raw = call_openrouter(prompt).strip()
 
         except Exception as fallback_error:
-        		print("Gemini Error =", gemini_error)
+            print("Gemini Error =", gemini_error)
             raise RuntimeError(
-                f"Gemini and OpenRouter both failed.\n"
-                f"Gemini: {gemini_error}\n"
-                f"OpenRouter: {fallback_error}"
-            )
+                    f"Gemini and OpenRouter both failed.\n"
+                    f"Gemini: {gemini_error}\n"
+                    f"OpenRouter: {fallback_error}"
+                )
 
     raw = re.sub(r"^```(?:json)?\s*", "", raw.strip(), flags=re.IGNORECASE)
     raw = re.sub(r"\s*```$", "", raw.strip())
