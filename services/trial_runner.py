@@ -59,7 +59,7 @@ def run_custom_trial(dispute: str) -> dict:
 
 def step_run_prolog(evidence_list: list, witnesses: list, defendant_name: str) -> dict:
     defendant_atom = defendant_name.lower().replace(' ', '_').replace('-', '_')
-    all_facts = extract_prolog_facts(evidence_list, witnesses)
+    all_facts = extract_prolog_facts(evidence_list, witnesses, defendant_name)
     try:
         return run_verdict(all_facts, defendant_atom)
     except Exception as e:
