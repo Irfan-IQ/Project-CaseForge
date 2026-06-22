@@ -54,7 +54,6 @@ def generate(prompt_name: str, **kwargs) -> str:
         return response.text
 
     except Exception as e:
-        print(f"[WARNING] Gemini failed, switching to OpenRouter: {e}")
 
         try:
             result = call_openrouter(prompt)
@@ -62,7 +61,6 @@ def generate(prompt_name: str, **kwargs) -> str:
             return result
 
         except Exception as fallback_error:
-            print(f"[ERROR] OpenRouter also failed: {fallback_error}")
             raise
 
 
