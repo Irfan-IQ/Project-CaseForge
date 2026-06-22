@@ -9,15 +9,26 @@ import re
 load_dotenv()
 
 # -----------------------------
-# OpenRouter — primary + fallback
+# Gemini Setup (new SDK — supports AQ. keys)
+# -----------------------------
+from google import genai as google_genai
+
+gemini_client = google_genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
+GEMINI_MODEL = "gemini-1.5-flash-8b"
+
+# -----------------------------
+# OpenRouter fallback
 # -----------------------------
 openrouter_client = OpenAI(
     api_key=os.getenv("OPENROUTER_API_KEY"),
     base_url="https://openrouter.ai/api/v1",
 )
 
-PRIMARY_MODEL = "google/gemini-2.0-flash-exp:free"
-FALLBACK_MODEL = "mistralai/mistral-7b-instruct:free"
+OPENROUTER_MODELS = [
+    "qwen/qwen-2.5-7b-instruct:free",
+    "meta-llama/llama-3.2-3b-instruct:free",
+    "microsoft/phi-3-mini-128k-instruct:free",
+]
 
 
 def load_prompt(name: str, **kwargs) -> str:
@@ -32,23 +43,32 @@ def load_prompt(name: str, **kwargs) -> str:
     return template
 
 
-def call_model(prompt: str, model: str) -> str:
-    response = openrouter_client.chat.completions.create(
-        model=model,
-        messages=[{"role": "user", "content": prompt}]
-    )
-    return response.choices[0].message.content
+def call_openrouter(prompt: str) -> str:
+    last_error = None
+    for model in OPENROUTER_MODELS:
+        try:
+            response = openrouter_client.chat.completions.create(
+                model=model,
+                messages=[{"role": "user", "content": prompt}]
+            )
+            print(f"[OpenRouter] {model} succeeded")
+            return response.choices[0].message.content
+        except Exception as e:
+            print(f"[OpenRouter] {model} failed: {e}")
+            last_error = e
+    raise last_error
 
 
 def generate(prompt_name: str, **kwargs) -> str:
     prompt = load_prompt(prompt_name, **kwargs)
 
     try:
-        result = call_model(prompt, PRIMARY_MODEL)
+        response = gemini_client.models.generate_content(model=GEMINI_MODEL, contents=prompt)
         time.sleep(1)
-        return result
-    except Exception:
-        result = call_model(prompt, FALLBACK_MODEL)
+        return response.text
+    except Exception as e:
+        print(f"[Gemini Failed] {e}")
+        result = call_openrouter(prompt)
         time.sleep(1)
         return result
 
@@ -62,24 +82,24 @@ def generate_json(prompt_name: str, **kwargs) -> dict:
     )
 
     raw = None
-    primary_error = None
+    gemini_error = None
 
     try:
-        raw = call_model(prompt, PRIMARY_MODEL).strip()
-        print(f"[Primary] {PRIMARY_MODEL} succeeded")
+        response = gemini_client.models.generate_content(model=GEMINI_MODEL, contents=prompt)
+        raw = response.text.strip()
+        print(f"[Gemini] succeeded")
     except Exception as e:
-        primary_error = e
-        print(f"[Primary Failed] {e}")
+        gemini_error = e
+        print(f"[Gemini Failed] {e}")
 
     if raw is None:
         try:
-            print(f"[Fallback] Trying {FALLBACK_MODEL}")
-            raw = call_model(prompt, FALLBACK_MODEL).strip()
+            raw = call_openrouter(prompt).strip()
         except Exception as fallback_error:
             raise RuntimeError(
-                f"Both models failed.\n"
-                f"Primary: {primary_error}\n"
-                f"Fallback: {fallback_error}"
+                f"Gemini and OpenRouter both failed.\n"
+                f"Gemini: {gemini_error}\n"
+                f"OpenRouter: {fallback_error}"
             )
 
     raw = re.sub(r"^```(?:json)?\s*", "", raw.strip(), flags=re.IGNORECASE)
