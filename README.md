@@ -1,14 +1,16 @@
 # CaseForge / VerdictOS
 
-AI-powered courtroom simulation engine. Submit any dispute — stolen biryani, broken collectible, proxy attendance — and watch a full legal drama unfold: witnesses, evidence, lawyer arguments, cross-examinations, and a deterministic Prolog verdict.
+AI-powered courtroom simulation engine. Submit any dispute — stolen biryani, broken collectible, proxy attendance — and watch a full legal drama unfold: witnesses, evidence, lawyer arguments, and a deterministic Prolog verdict.
 
-**Stack:** Python 3.11 · Textual TUI · Gemini 1.5-flash · SWI-Prolog · SQLite · Firebase Firestore · Google Cloud Run
+**Live:** https://verdictos.onrender.com
+
+**Stack:** Python 3.11 · Textual TUI · Flask SSE · OpenRouter (Gemini / Llama fallback) · SWI-Prolog · SQLite · Firebase Firestore · Render
 
 ---
 
 ## Local Setup
 
-### 1. Install SWI-Prolog (required before pip install)
+### 1. Install SWI-Prolog
 
 ```bash
 # macOS
@@ -32,91 +34,95 @@ cp .env.example .env
 
 Edit `.env` and add:
 ```
-GEMINI_API_KEY=your_key_here
+GEMINI_API_KEY=your_gemini_key_here
+OPENROUTER_API_KEY=your_openrouter_key_here
 FIREBASE_CRED_PATH=serviceAccountKey.json   # optional
 ```
 
-Get a Gemini API key at: https://aistudio.google.com
+- Gemini key: https://aistudio.google.com
+- OpenRouter key: https://openrouter.ai/keys (used as fallback if Gemini fails)
 
 ### 4. (Optional) Firebase setup
 
 - Go to console.firebase.google.com → Create project → Firestore Database
 - Project Settings → Service Accounts → Generate New Private Key
-- Save the file as `serviceAccountKey.json` in the project root
-- Add `FIREBASE_CRED_PATH=serviceAccountKey.json` to `.env`
+- Save as `serviceAccountKey.json` in the project root
 
 Firebase is optional — the app runs fully without it.
 
 ### 5. Run
 
+**Terminal UI (local):**
 ```bash
 python main.py
 ```
 
----
-
-## Usage
-
-- Type any dispute into the input field and press **FILE CASE**
-- Or use the demo buttons (Biryani Theft, SpiderMan, Attendance Fraud) for instant pre-seeded trials
-- Press **q** to quit at any time
+**Web app (local):**
+```bash
+python app_web.py
+```
+Then open http://localhost:5000
 
 ---
 
 ## Architecture
 
 ```
-User Input → Gemini (case gen) → Gemini (evidence) → Gemini (witnesses)
-          → Gemini (lawyer args) → Gemini (cross-exam)
-          → SWI-Prolog (deterministic verdict)
-          → Firebase (archive) → Textual UI (display)
+User Input
+    │
+    ▼
+OpenRouter API (single call)
+    │  Generates: case + evidence + witnesses + lawyers in one JSON
+    ▼
+SWI-Prolog verdict engine
+    │  Evaluates: opportunity + motive + alibi → guilty / not_guilty / insufficient_evidence
+    ▼
+Firebase Firestore (archive)
+    │
+    ▼
+Textual TUI  /  Flask SSE web app
 ```
 
 The LLM generates creative content. Prolog decides the verdict — no hallucinated logic.
 
 ---
 
-## Google Cloud Run Deployment
+## Deployment (Render)
 
-```bash
-# One-time setup
-gcloud auth login
-gcloud config set project YOUR_PROJECT_ID
-gcloud services enable run.googleapis.com
+The app is deployed on Render using Docker. Set these environment variables in the Render dashboard:
 
-# Deploy
-gcloud run deploy verdictos \
-  --source . \
-  --region us-central1 \
-  --allow-unauthenticated \
-  --set-env-vars GEMINI_API_KEY=your_key_here
 ```
+GEMINI_API_KEY=...
+OPENROUTER_API_KEY=...
+```
+
+Render auto-deploys on every push to `main`.
 
 ---
 
 ## Project Structure
 
 ```
-main.py                     Entry point
+main.py                     TUI entry point
+app_web.py                  Flask web app with SSE streaming
 services/
-  gemini_service.py         Gemini API calls
-  trial_runner.py           Pipeline step functions
-  contradiction_checker.py  Python ↔ Prolog bridge
-  evidence_engine.py        Prolog fact extraction
+  gemini_service.py         OpenRouter/Gemini API calls + fallback logic
+  trial_runner.py           Trial pipeline (run_custom_trial, demo loader)
+  contradiction_checker.py  Python ↔ SWI-Prolog bridge
+  evidence_engine.py        Prolog fact extraction from AI output
   firebase_service.py       Firestore archive
-prompts/                    Gemini prompt templates
+prompts/
+  trial_gen.txt             Single prompt: generates full trial as one JSON
 prolog/
-  rules.pl                  Legal axioms (guilty/contradiction/verdict)
+  rules.pl                  Legal axioms (opportunity/motive/alibi → verdict)
   evidence.pl               Runtime facts (overwritten per case)
-  judge.pl                  Entry predicate
 ui/
   app.py                    Textual App class
   screens.py                CaseInputScreen, TrialScreen, VerdictScreen
   widgets.py                EvidenceBoard widget
-  assets/theme.tcss         Dark theme stylesheet
 database/
-  schema.sql                SQLite schema
-  db.py                     Data access layer
-demo_cases/                 Pre-seeded JSON scenarios
-deployment/                 Dockerfile + Cloud Build config
+  db.py                     SQLite data access layer
+demo_cases/                 Pre-seeded JSON scenarios (biryani, spiderman, attendance)
+Dockerfile                  Docker build (includes SWI-Prolog)
+render.yaml                 Render deployment config
 ```
