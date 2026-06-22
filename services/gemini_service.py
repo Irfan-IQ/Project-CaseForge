@@ -12,7 +12,7 @@ load_dotenv()
 # Gemini Setup
 # -----------------------------
 genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
-gemini_model = genai.GenerativeModel("gemini-1.5-flash")
+gemini_model = genai.GenerativeModel("gemini-2.5-flash")
 
 # -----------------------------
 # OpenRouter Setup
@@ -23,7 +23,7 @@ openrouter_client = OpenAI(
 )
 
 # Change this if you want another model
-OPENROUTER_MODEL = "google/gemma-3-12b-it:free"
+OPENROUTER_MODEL = "google/gemma-4-26b-a4b-it:free"
 
 
 def load_prompt(name: str, **kwargs) -> str:

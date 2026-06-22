@@ -209,18 +209,6 @@ class TrialScreen(Screen):
                 VerdictScreen(result=result)
             )
 
-            verdict = prolog_result['verdict'].upper().replace('_', ' ')
-            self._log(f'\n[bold red]━━━ VERDICT: {verdict} ━━━[/bold red]')
-            self._status(f'[green]Complete. Verdict: {verdict}[/green]')
-            await asyncio.sleep(1.5)
-            self.app.push_screen(VerdictScreen(result={
-                'title': case_data.get('title', ''),
-                'verdict': prolog_result['verdict'],
-                'contradictions': prolog_result['contradictions'],
-                'firebase_id': firebase_id,
-                'evidence_list': evidence_list,
-                'witnesses': witnesses,
-            }))
 
         except Exception as exc:
             self._log(f'[bold red]ERROR: {exc}[/bold red]')

@@ -19,6 +19,12 @@ def run_custom_trial(dispute: str) -> dict:
         "trial_gen",
         dispute=dispute
     )
+    
+    print("\n--------------TRIAL------------------\n")
+    print(trial)
+    print("---------------------------------------\n")
+    with open('testing.txt','w') as file:
+    	file.write(trial)
 
     case_data = trial["case"]
     evidence_list = trial["evidence"]
