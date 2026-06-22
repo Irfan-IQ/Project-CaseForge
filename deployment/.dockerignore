@@ -1,0 +1,7 @@
+.env
+*.db
+serviceAccountKey.json
+__pycache__/
+*.pyc
+.git
+.gitignore

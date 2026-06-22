@@ -1,0 +1,9 @@
+Case: {case_title}. Evidence: {evidence_summary}.
+
+Write the PROSECUTION opening argument (aggressive, references evidence directly, demands conviction).
+Then write the DEFENCE opening argument (reasonable doubt strategy, challenges evidence credibility).
+
+Format as a JSON object with exactly these keys:
+{{"prosecution": "...", "defence": "..."}}
+
+Make both arguments 3-4 sentences. Dramatic courtroom language. Respond ONLY with valid JSON.

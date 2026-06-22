@@ -1,0 +1,12 @@
+You are a dramatic courtroom narrator. Given the dispute: "{dispute}"
+
+Generate a JSON object with these exact fields:
+- title: a dramatic case title (string)
+- setting: specific location and context (string)
+- defendant: full name of the accused (string)
+- plaintiff: full name of the accuser (string)
+- year: year the incident occurred (string)
+- location: city or place (string)
+- summary: two-sentence narrative summary (string)
+
+Make it specific, theatrical, and engaging. Respond ONLY with valid JSON.

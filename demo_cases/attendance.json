@@ -1,0 +1,60 @@
+{
+  "title": "The Phantom Proxy: A Digital Attendance Fraud",
+  "dispute_text": "A student marked attendance via proxy during the OOP C++ lab session",
+  "setting": "CSE Lab 3, Computer Science Department, Friday 2PM lab session",
+  "defendant": "Priya Sharma",
+  "plaintiff": "CSE Department",
+  "year": "2025",
+  "location": "Engineering College, Hyderabad",
+  "summary": "During a compulsory Object-Oriented Programming in C++ lab session, attendance was logged for Priya Sharma — but digital forensics reveal her code submission came from an off-campus IP address at the exact same time. Someone signed in for her.",
+  "pre_generated_evidence": [
+    {
+      "description": "IP address of code submission does not match lab network",
+      "prolog_fact": "digital_evidence(ip_mismatch, true).",
+      "evidence_type": "digital"
+    },
+    {
+      "description": "File submission timestamp matches lab attendance time exactly",
+      "prolog_fact": "file_timestamp(submission, lab_time_conflict).",
+      "evidence_type": "digital"
+    },
+    {
+      "description": "Priya had attendance shortage — motive to fake attendance",
+      "prolog_fact": "has_motive(priya_sharma).",
+      "evidence_type": "testimony"
+    },
+    {
+      "description": "Her friend Neha had access to her credentials",
+      "prolog_fact": "has_opportunity(priya_sharma).",
+      "evidence_type": "testimony"
+    }
+  ],
+  "pre_generated_witnesses": [
+    {
+      "name": "Neha Gupta",
+      "occupation": "Classmate and close friend",
+      "personality": "anxious",
+      "alibi_claim": "I was sitting next to Priya in the lab the entire session",
+      "secret": "She submitted Priya's code from her own laptop using Priya's login credentials",
+      "prolog_facts": [
+        "location_at(neha_gupta, lab_time, cse_lab).",
+        "location_at(priya_sharma, lab_time, off_campus)."
+      ]
+    },
+    {
+      "name": "Prof. Ramesh",
+      "occupation": "Lab Instructor",
+      "personality": "stern",
+      "alibi_claim": "I checked attendance manually and saw both students present",
+      "secret": "He was distracted with a phone call and did not verify faces against IDs",
+      "prolog_facts": [
+        "location_at(prof_ramesh, lab_time, cse_lab)."
+      ]
+    }
+  ],
+  "pre_generated_verdict": {
+    "verdict": "guilty",
+    "contradictions": ["neha_gupta"],
+    "reasoning": "Digital evidence is irrefutable: the submission IP places the code upload off-campus while the attendance record claims in-lab presence. Neha's alibi that both were present contradicts the IP timestamp data. GUILTY of proxy attendance fraud."
+  }
+}

@@ -1,0 +1,6 @@
+textual>=0.47.0
+google-generativeai>=0.7.0
+pyswip>=0.2.10
+firebase-admin>=6.0.0
+python-dotenv>=1.0.0
+rich>=13.0.0

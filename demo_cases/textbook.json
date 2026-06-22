@@ -1,0 +1,71 @@
+{
+  "title": "The Defiled Compendium: Layam Pedagogy Destroyed",
+  "dispute_text": "A rare library book was returned water-damaged with torn pages",
+  "setting": "College Library, Fine Arts Department, Book Return Counter",
+  "defendant": "Meera Krishnan",
+  "plaintiff": "College Library",
+  "year": "2025",
+  "location": "Music College, Chennai",
+  "summary": "A rare, heavily annotated copy of 'Layam Pedagogy in Carnatic Music' — irreplaceable and valued at Rs. 45,000 — was returned in a state of severe water damage with three pages torn. Library checkout photos prove it was in perfect condition when borrowed by Meera Krishnan.",
+  "pre_generated_evidence": [
+    {
+      "description": "Library checkout photo shows book in perfect condition",
+      "prolog_fact": "book_condition_at_checkout(perfect).",
+      "evidence_type": "digital"
+    },
+    {
+      "description": "Book returned with water damage and torn pages",
+      "prolog_fact": "book_condition_at_return(damaged).",
+      "evidence_type": "physical"
+    },
+    {
+      "description": "Meera was the last and only borrower of this book",
+      "prolog_fact": "last_borrower(meera_krishnan).",
+      "evidence_type": "testimony"
+    },
+    {
+      "description": "Checkout photo timestamp and condition documented",
+      "prolog_fact": "photo_evidence(checkout_photo, undamaged).",
+      "evidence_type": "digital"
+    },
+    {
+      "description": "Meera had the book for 3 weeks without renewing",
+      "prolog_fact": "has_opportunity(meera_krishnan).",
+      "evidence_type": "testimony"
+    },
+    {
+      "description": "Meera claims the damage pre-existed",
+      "prolog_fact": "has_motive(meera_krishnan).",
+      "evidence_type": "testimony"
+    }
+  ],
+  "pre_generated_witnesses": [
+    {
+      "name": "Librarian Saraswathi",
+      "occupation": "Senior Librarian, 20 years service",
+      "personality": "precise",
+      "alibi_claim": "I personally photographed the book at checkout and it was immaculate",
+      "secret": "She suspects Meera but lacks direct evidence of how the damage occurred",
+      "prolog_facts": [
+        "location_at(librarian_saraswathi, checkout_day, library).",
+        "location_at(meera_krishnan, checkout_day, library)."
+      ]
+    },
+    {
+      "name": "Divya Nair",
+      "occupation": "Meera's classmate",
+      "personality": "loyal",
+      "alibi_claim": "Meera kept the book in a safe bag the whole time, I saw it",
+      "secret": "She knows Meera spilled tea on the book but is covering for her",
+      "prolog_facts": [
+        "location_at(divya_nair, incident_day, hostel_room).",
+        "location_at(meera_krishnan, incident_day, hostel_room)."
+      ]
+    }
+  ],
+  "pre_generated_verdict": {
+    "verdict": "guilty",
+    "contradictions": ["divya_nair"],
+    "reasoning": "Photographic proof at checkout establishes the book's pristine state. Meera was the sole borrower for 3 weeks. Divya's testimony of careful handling collapses when she is placed at the same location as Meera on the day the damage likely occurred. GUILTY."
+  }
+}

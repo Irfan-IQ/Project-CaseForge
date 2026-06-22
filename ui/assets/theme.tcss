@@ -1,0 +1,61 @@
+Screen {
+    background: #0D0D0D;
+}
+
+#title {
+    color: #E94560;
+    text-style: bold;
+    padding: 1;
+}
+
+#left_panel {
+    width: 40%;
+    border: solid #E94560;
+    padding: 1;
+}
+
+#right_panel {
+    width: 60%;
+    border: solid #00D4FF;
+    padding: 1;
+}
+
+.panel-title {
+    color: #F5A623;
+    text-style: bold;
+}
+
+#verdict_title {
+    color: #E94560;
+    text-style: bold;
+    text-align: center;
+}
+
+#verdict_text {
+    color: #39FF14;
+    text-style: bold;
+    text-align: center;
+}
+
+Button.-error {
+    background: #E94560;
+    color: #FFFFFF;
+}
+
+Button.-warning {
+    background: #F5A623;
+    color: #000000;
+}
+
+RichLog {
+    scrollbar-color: #E94560;
+}
+
+Input {
+    border: solid #00D4FF;
+}
+
+DataTable {
+    height: auto;
+    max-height: 15;
+}

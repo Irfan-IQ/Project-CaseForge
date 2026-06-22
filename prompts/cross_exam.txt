@@ -1,0 +1,12 @@
+Witness {witness_name} ({personality}) is on the stand.
+Case: {case_title}. Their alibi: {alibi_claim}. Secret: {secret}.
+
+Generate a cross-examination dialogue with exactly 5 question-and-answer pairs where the prosecution catches a contradiction. Include one dramatic moment where the witness clearly slips up and their alibi collapses.
+
+Format as a JSON array of objects, each with:
+- questioner: "PROSECUTION" or "DEFENCE" (string)
+- question: the lawyer's question (string)
+- answer: the witness's answer (string)
+- contradiction: true if this exchange reveals a contradiction, false otherwise (boolean)
+
+Respond ONLY with a valid JSON array.

@@ -1,0 +1,55 @@
+{
+  "title": "The Shattered Spider: A Collectible's Tragic End",
+  "dispute_text": "My limited edition SpiderMan collectible was destroyed in our shared hostel room",
+  "setting": "Room 204, Block B Hostel, shared double-occupancy room",
+  "defendant": "Vikram Nair",
+  "plaintiff": "Arjun Das",
+  "year": "2025",
+  "location": "University Hostel, Bangalore",
+  "summary": "A pristine limited-edition SpiderMan action figure, worth Rs. 8000, was found shattered on the floor of a shared hostel room. The figure was kept on a high shelf accessible only from Vikram's side of the room — and Vikram claims he never touched it.",
+  "pre_generated_evidence": [
+    {
+      "description": "Figure located on shelf exclusively on Vikram's side of room",
+      "prolog_fact": "location_at(collectible, display_day, shelf_side_b).",
+      "evidence_type": "physical"
+    },
+    {
+      "description": "Vikram occupies the side_b of the room",
+      "prolog_fact": "occupies_side(vikram_nair, side_b).",
+      "evidence_type": "physical"
+    },
+    {
+      "description": "Vikram had motive — ongoing dispute over room cleanliness",
+      "prolog_fact": "has_motive(vikram_nair).",
+      "evidence_type": "testimony"
+    },
+    {
+      "description": "Vikram was in the room alone for 2 hours before incident",
+      "prolog_fact": "has_opportunity(vikram_nair).",
+      "evidence_type": "testimony"
+    },
+    {
+      "description": "Vikram claims to have been at the library — no alibi",
+      "prolog_fact": "has_alibi(vikram_nair) :- false.",
+      "evidence_type": "testimony"
+    }
+  ],
+  "pre_generated_witnesses": [
+    {
+      "name": "Karan Mehta",
+      "occupation": "Neighbour in Room 203",
+      "personality": "evasive",
+      "alibi_claim": "I heard a crash from their room around 3PM when only Vikram was inside",
+      "secret": "He saw Vikram throw something in anger but does not want to get involved",
+      "prolog_facts": [
+        "location_at(karan_mehta, afternoon, room_203).",
+        "location_at(vikram_nair, afternoon, room_204)."
+      ]
+    }
+  ],
+  "pre_generated_verdict": {
+    "verdict": "guilty",
+    "contradictions": ["vikram_nair"],
+    "reasoning": "Physical evidence places the collectible exclusively within Vikram's reach. His alibi of being at the library is contradicted by Karan's testimony placing him in the room at the time of the crash. Motive, opportunity, and physical access converge: GUILTY."
+  }
+}

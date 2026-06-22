@@ -1,0 +1,19 @@
+You are generating witnesses for a legal case: "{case_title}" in {setting}.
+
+Create {num_witnesses} witnesses as a JSON array. Each witness object must have:
+- name: full name (string)
+- occupation: job or role (string)
+- personality: one-word personality trait (string)
+- alibi_claim: what they claim their alibi is (string)
+- secret: what they are actually hiding (string)
+- prolog_facts: array of valid Prolog fact strings about their location and knowledge
+
+For prolog_facts, use predicates like:
+  location_at(name_atom, time_atom, place_atom).
+  has_motive(name_atom).
+  has_opportunity(name_atom).
+  has_alibi(name_atom).
+
+IMPORTANT: All Prolog atoms must be lowercase_with_underscores. No spaces in atom names.
+
+Respond ONLY with a valid JSON array.

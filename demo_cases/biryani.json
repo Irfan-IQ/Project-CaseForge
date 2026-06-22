@@ -1,0 +1,60 @@
+{
+  "title": "The Midnight Biryani Heist of Block C",
+  "dispute_text": "Someone stole my biryani from the hostel refrigerator at midnight",
+  "setting": "Block C Hostel Kitchen, University Campus, 2AM",
+  "defendant": "Arun Kumar",
+  "plaintiff": "Siddharth Rajan",
+  "year": "2025",
+  "location": "University Hostel, Chennai",
+  "summary": "A container of precious chicken biryani, lovingly prepared and stored in the Block C communal refrigerator, was found missing at 2AM. Fingerprints on the fridge handle and conflicting witness testimonies point to a hungry suspect.",
+  "pre_generated_evidence": [
+    {
+      "description": "Fingerprints matching Arun Kumar found on fridge handle",
+      "prolog_fact": "fingerprint_on(arun_kumar, fridge_handle).",
+      "evidence_type": "physical"
+    },
+    {
+      "description": "CCTV footage shows Arun near kitchen at midnight",
+      "prolog_fact": "location_at(arun_kumar, midnight, kitchen).",
+      "evidence_type": "digital"
+    },
+    {
+      "description": "Arun had no dinner that evening (motive)",
+      "prolog_fact": "has_motive(arun_kumar).",
+      "evidence_type": "testimony"
+    },
+    {
+      "description": "Arun's room is adjacent to the kitchen (opportunity)",
+      "prolog_fact": "has_opportunity(arun_kumar).",
+      "evidence_type": "physical"
+    }
+  ],
+  "pre_generated_witnesses": [
+    {
+      "name": "Raju Sharma",
+      "occupation": "Insomniac student, Linear Algebra enthusiast",
+      "personality": "nervous",
+      "alibi_claim": "I was in the study room at midnight solving eigenvalue problems",
+      "secret": "He was actually in the kitchen getting water and saw Arun take the biryani",
+      "prolog_facts": [
+        "location_at(raju_sharma, midnight, study_room).",
+        "location_at(raju_sharma, midnight, kitchen)."
+      ]
+    },
+    {
+      "name": "Priya Menon",
+      "occupation": "Hostel Warden's assistant",
+      "personality": "meticulous",
+      "alibi_claim": "The kitchen log shows no entry after 11PM",
+      "secret": "She forgot to check the CCTV for the midnight hour",
+      "prolog_facts": [
+        "has_opportunity(arun_kumar)."
+      ]
+    }
+  ],
+  "pre_generated_verdict": {
+    "verdict": "guilty",
+    "contradictions": ["raju_sharma"],
+    "reasoning": "Raju Sharma's alibi collapses under cross-examination. CCTV places him in the kitchen at midnight — contradicting his claim of being in the study room. Combined with Arun's fingerprints on the fridge handle and confirmed motive, the verdict is GUILTY."
+  }
+}

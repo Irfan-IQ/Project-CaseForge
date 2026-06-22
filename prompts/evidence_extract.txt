@@ -1,0 +1,21 @@
+From this trial summary: {trial_summary}
+
+Extract symbolic Prolog facts that represent the key evidence. Return a JSON object with:
+- evidence_list: array of evidence objects, each with:
+  - description: human-readable description (string)
+  - prolog_fact: a valid Prolog fact string (string)
+  - evidence_type: one of "physical", "testimony", "digital" (string)
+- prolog_facts: flat array of all prolog_fact strings (for convenience)
+
+Use these predicates where applicable:
+  has_motive(name_atom).
+  has_opportunity(name_atom).
+  location_at(name_atom, time_atom, place_atom).
+  fingerprint_on(name_atom, object_atom).
+  has_alibi(name_atom).
+  digital_evidence(type_atom, value_atom).
+
+IMPORTANT: All Prolog atoms must be lowercase_with_underscores. End each fact with a period.
+Identify the main defendant and use their name as the atom.
+
+Respond ONLY with valid JSON.
