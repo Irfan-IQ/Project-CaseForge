@@ -8,16 +8,20 @@ import re
 
 load_dotenv()
 
+from google import genai as google_genai
+
+gemini_client = google_genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
+GEMINI_MODEL = "gemini-2.0-flash-lite"
+
 openrouter_client = OpenAI(
     api_key=os.getenv("OPENROUTER_API_KEY"),
     base_url="https://openrouter.ai/api/v1",
 )
 
-MODELS = [
+OPENROUTER_MODELS = [
     "google/gemma-4-26b-a4b-it:free",
     "meta-llama/llama-3.3-70b-instruct:free",
     "meta-llama/llama-3.2-3b-instruct:free",
-    "liquid/lfm-2.5-1.2b-instruct:free",
 ]
 
 
@@ -28,33 +32,52 @@ def load_prompt(name: str, **kwargs) -> str:
     return template
 
 
-def _call(prompt: str) -> str:
+def _call_openrouter(prompt: str) -> str:
     last_error = None
-    for model in MODELS:
+    for model in OPENROUTER_MODELS:
         try:
             response = openrouter_client.chat.completions.create(
                 model=model,
                 messages=[{"role": "user", "content": prompt}],
                 timeout=60,
             )
-            print(f"[OK] {model}")
+            print(f"[OpenRouter OK] {model}")
             return response.choices[0].message.content
         except Exception as e:
-            print(f"[FAIL] {model}: {e}")
+            print(f"[OpenRouter FAIL] {model}: {e}")
             last_error = e
             time.sleep(2)
-    raise RuntimeError(f"All models failed. Last error: {last_error}")
+    raise RuntimeError(f"OpenRouter fallback exhausted. Last: {last_error}")
 
 
 def generate(prompt_name: str, **kwargs) -> str:
-    return _call(load_prompt(prompt_name, **kwargs))
+    prompt = load_prompt(prompt_name, **kwargs)
+    try:
+        response = gemini_client.models.generate_content(model=GEMINI_MODEL, contents=prompt)
+        print("[Gemini OK]")
+        return response.text
+    except Exception as e:
+        print(f"[Gemini FAIL] {e}")
+        return _call_openrouter(prompt)
 
 
 def generate_json(prompt_name: str, **kwargs) -> dict:
     prompt = load_prompt(prompt_name, **kwargs)
     prompt += "\nRespond ONLY with valid JSON. No markdown. No explanations."
 
-    raw = _call(prompt).strip()
+    raw = None
+    gemini_error = None
+
+    try:
+        response = gemini_client.models.generate_content(model=GEMINI_MODEL, contents=prompt)
+        raw = response.text.strip()
+        print("[Gemini OK]")
+    except Exception as e:
+        gemini_error = e
+        print(f"[Gemini FAIL] {e}")
+
+    if raw is None:
+        raw = _call_openrouter(prompt).strip()
 
     raw = re.sub(r"^```(?:json)?\s*", "", raw, flags=re.IGNORECASE)
     raw = re.sub(r"\s*```$", "", raw).strip()
